@@ -7,5 +7,6 @@ module.exports = {
       "always",
       ["feat", "fix", "chore", "docs", "style", "refactor", "perf", "test"],
     ],
+    "body-max-line-length": [2, "always", Infinity],
   },
 };
