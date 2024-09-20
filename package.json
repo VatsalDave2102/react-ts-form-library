@@ -1,6 +1,6 @@
 {
   "name": "@vatsal-dave/react-ts-form-library",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "main": "dist/cjs/index.js",
   "module": "dist/es/index.js",
