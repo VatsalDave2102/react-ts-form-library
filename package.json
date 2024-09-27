@@ -9,13 +9,14 @@
     "/dist"
   ],
   "scripts": {
-    "build": "tsc -b && vite build",
+    "build": "vite build && npm run types",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "format": "prettier --write 'src/**/*.{ts,tsx}'",
     "preview": "vite preview",
     "prepare": "husky",
-    "test": "jest"
+    "test": "jest",
+    "types": "tsc --project tsconfig.app.json --emitDeclarationOnly --outDir dist/types"
   },
   "dependencies": {
     "react": "^18.3.1",

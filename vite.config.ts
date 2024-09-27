@@ -9,15 +9,15 @@ export default defineConfig({
   plugins: [
     react(),
     dts({
-      insertTypesEntry: true,
-      staticImport: true,
+      include: ["src"],
+      rollupTypes: true,
       outDir: "dist/types",
     }),
   ],
   build: {
     lib: {
       entry: resolve(__dirname, "src/index.ts"),
-      name: "evoke-ui",
+      name: "react-ts-form-library",
       formats: ["es", "cjs"],
       fileName: (format) => `${format}/index.js`,
     },
