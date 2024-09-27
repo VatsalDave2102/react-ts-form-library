@@ -2,12 +2,16 @@ import { useCallback, useRef, useState } from "react";
 
 import {
   FieldErrors,
+  FieldPath,
+  FieldPathValue,
   FieldValues,
   RegisterOptions,
   UseForm,
   ValidationRule,
 } from "../types";
-import { isString } from "../types/predicate";
+import { getNestedValue } from "../helpers/getNestedValue";
+import { setNestedValue } from "../helpers/setNestedValue";
+import { validateField } from "../validators/validateField";
 
 /**
  * A custom hook for managing form state and validation.
@@ -20,43 +24,9 @@ export function useForm<T extends FieldValues>(): UseForm<T> {
   const [errors, setErrors] = useState<FieldErrors<T>>({});
 
   // Store validation rules for each field
-  const fieldsRef = useRef<Record<keyof T, ValidationRule>>(
-    {} as Record<keyof T, ValidationRule>
+  const fieldsRef = useRef<Record<FieldPath<T>, ValidationRule<T>>>(
+    {} as Record<FieldPath<T>, ValidationRule<T>>
   );
-
-  /**
-   * Validates a single field based on its rules.
-   * @param {keyof T} name - The name of the field to validate.
-   * @param {unknown} value - The value of the field to validate.
-   * @returns {string} An error message if validation fails, or an empty string if it passes.
-   */
-  const validateField = (name: keyof T, value: unknown) => {
-    const rules = fieldsRef.current[name];
-
-    if (!rules) return "";
-
-    // Check required rule
-    if (rules.required && !value) {
-      return "This field is required";
-    }
-
-    // Check pattern rule
-    if (rules.pattern && isString(value) && !rules.pattern.test(value)) {
-      return "Invalid format";
-    }
-
-    // Check custom validation rule
-    if (rules.validate) {
-      const validationResult = rules.validate(value);
-      if (isString(validationResult)) {
-        return validationResult;
-      } else if (!validationResult) {
-        return "Invalid value";
-      }
-    }
-
-    return "";
-  };
 
   /**
    * Registers a field with the form.
@@ -65,29 +35,32 @@ export function useForm<T extends FieldValues>(): UseForm<T> {
    * @returns {Object} An object with field properties for React.
    */
   const register = useCallback(
-    (name: keyof T, options: RegisterOptions = {}) => {
+    <P extends FieldPath<T>>(name: P, options: RegisterOptions<T> = {}) => {
+      // Store validation rules for the field
       fieldsRef.current[name] = options;
-      return {
-        name,
-        onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-          const value =
-            e.target.type === "checkbox" ? e.target.checked : e.target.value;
-          setValues((prev) => ({ ...prev, [name]: value }));
-        },
-        onBlur: () => {
-          const error = validateField(name, values[name]);
 
-          setErrors((prev) => ({
-            ...prev,
-            [name]: error,
-          }));
-        },
-        ref: () => {
-          // ref can be used for imperative operations if needed
-        },
+      const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value =
+          e.target.type === "checkbox" ? e.target.checked : e.target.value;
+        // Update form values
+        setValues((prev) =>
+          setNestedValue(prev, name, value as FieldPathValue<T, P>)
+        );
       };
+
+      const onBlur = () => {
+        const value = getNestedValue(values, name);
+        // Validate field on blur
+        const error = validateField(value, fieldsRef.current[name]);
+
+        setErrors((prev) => ({
+          ...prev,
+          [name]: error,
+        }));
+      };
+      return { name, onChange, onBlur, ref: () => {} };
     },
-    [values, validateField]
+    [values]
   );
 
   /**
@@ -103,9 +76,11 @@ export function useForm<T extends FieldValues>(): UseForm<T> {
 
       // Validate all fields
       Object.keys(fieldsRef.current).forEach((fieldName) => {
-        const error = validateField(fieldName, values[fieldName]);
+        const name = fieldName as FieldPath<T>;
+        const value = getNestedValue(values, name);
+        const error = validateField(value, fieldsRef.current[name]);
         if (error) {
-          newErrors[fieldName as keyof T] = error;
+          newErrors[name] = error;
           hasErrors = true;
         }
       });
@@ -120,5 +95,73 @@ export function useForm<T extends FieldValues>(): UseForm<T> {
     [values]
   );
 
-  return { register, handleSubmit, errors, values };
+  /**
+   * Sets the value of a specific field.
+   *
+   * @param {P} name - The name of the field to update.
+   * @param {FieldPathValue<T, P>} value - The new value for the field.
+   */
+  const setFieldValue = useCallback(
+    <P extends FieldPath<T>>(name: P, value: FieldPathValue<T, P>) => {
+      setValues((prev) => setNestedValue(prev, name, value));
+    },
+    []
+  );
+
+  /**
+   * Removes a field from the form state.
+   *
+   * @param {P} name - The name of the field to remove.
+   */
+  const removeField = useCallback(<P extends FieldPath<T>>(name: P) => {
+    setValues((prev) => {
+      const newValues = { ...prev };
+      const keys = name.split(".");
+      const lastKey = keys.pop()!;
+      const lastObj = keys.reduce(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (acc: any, key) => (acc && acc[key] !== undefined ? acc[key] : acc),
+        newValues
+      );
+
+      if (lastObj) {
+        const isArrayIndex = !isNaN(Number(lastKey));
+        if (isArrayIndex && Array.isArray(lastObj)) {
+          // Remove array element
+          lastObj.splice(Number(lastKey), 1);
+
+          // Maintain an empty array if no elements left
+          if (lastObj.length === 0) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            keys.reduce((acc: any, key) => acc && acc[key], newValues)[
+              keys.pop()!
+            ] = [];
+          }
+        } else {
+          // Remove object property
+          delete lastObj[lastKey];
+        }
+      }
+
+      return newValues;
+    });
+    // Remove field errors
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+      const keys = name.split(".");
+      const lastKey = keys.pop()!;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let current: any = newErrors;
+      for (let i = 0; i < keys.length - 1; i++) {
+        const key = keys[i];
+        current = current[key] || {};
+      }
+      delete current[lastKey];
+      return newErrors;
+    });
+    // Remove field validation rules
+    delete fieldsRef.current[name];
+  }, []);
+
+  return { register, handleSubmit, errors, values, setFieldValue, removeField };
 }
