@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/VatsalDave2102/react-ts-form-library/compare/v1.2.0...v1.2.1) (2024-09-27)
+
+
+### Bug Fixes
+
+* resolve missing type imports after build ([6236d8b](https://github.com/VatsalDave2102/react-ts-form-library/commit/6236d8b089d48abafa10be40b1973122018fb7b4))
+
 # [1.2.0](https://github.com/VatsalDave2102/react-ts-form-library/compare/v1.1.0...v1.2.0) (2024-09-27)
 
 
