@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/VatsalDave2102/react-ts-form-library/compare/v1.1.0...v1.2.0) (2024-09-27)
+
+
+### Features
+
+* add support for nested and dynamic fields ([a741bf2](https://github.com/VatsalDave2102/react-ts-form-library/commit/a741bf2483c90d5b4f52157d1072f39c2221c13a))
+
 # [1.1.0](https://github.com/VatsalDave2102/react-ts-form-library/compare/v1.0.0...v1.1.0) (2024-09-25)
 
 
