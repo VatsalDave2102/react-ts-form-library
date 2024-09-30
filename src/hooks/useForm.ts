@@ -7,7 +7,6 @@ import {
   FieldValues,
   RegisterOptions,
   UseForm,
-  ValidationRule,
 } from "../types";
 import { getNestedValue } from "../helpers/getNestedValue";
 import { setNestedValue } from "../helpers/setNestedValue";
@@ -24,10 +23,9 @@ export function useForm<T extends FieldValues>(): UseForm<T> {
   const [errors, setErrors] = useState<FieldErrors<T>>({});
 
   // Store validation rules for each field
-  const fieldsRef = useRef<Record<FieldPath<T>, ValidationRule<T>>>(
-    {} as Record<FieldPath<T>, ValidationRule<T>>
-  );
-
+  const fieldsRef = useRef<{
+    [K in FieldPath<T>]?: RegisterOptions<T, K>;
+  }>({});
   /**
    * Registers a field with the form.
    * @param {keyof T} name - The name of the field to register.
@@ -35,7 +33,7 @@ export function useForm<T extends FieldValues>(): UseForm<T> {
    * @returns {Object} An object with field properties for React.
    */
   const register = useCallback(
-    <P extends FieldPath<T>>(name: P, options: RegisterOptions<T> = {}) => {
+    <P extends FieldPath<T>>(name: P, options: RegisterOptions<T, P> = {}) => {
       // Store validation rules for the field
       fieldsRef.current[name] = options;
 

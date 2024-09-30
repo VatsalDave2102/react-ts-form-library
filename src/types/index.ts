@@ -42,20 +42,23 @@ export type FieldErrors<T extends FieldValues> = {
   [K in FieldPath<T>]?: string;
 };
 
-export type ValidationRule<T> = {
+export type ValidationRule<T extends FieldValues, P extends FieldPath<T>> = {
   required?: boolean;
   pattern?: RegExp;
-  validate?: (value: FieldPathValue<T, FieldPath<T>>) => boolean | string;
+  validate?: (value: FieldPathValue<T, P>) => boolean | string;
 };
 
-export type RegisterOptions<T extends FieldValues> = ValidationRule<T>;
+export type RegisterOptions<
+  T extends FieldValues,
+  P extends FieldPath<T>,
+> = ValidationRule<T, P>;
 
 export interface UseForm<T extends FieldValues> {
   register: <P extends FieldPath<T>>(
     name: P,
-    options?: RegisterOptions<T>
+    options?: RegisterOptions<T, P>
   ) => {
-    name: keyof T;
+    name: P;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     onBlur: () => void;
     ref: (element: HTMLInputElement | null) => void;
