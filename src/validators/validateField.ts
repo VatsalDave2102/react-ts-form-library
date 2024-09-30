@@ -8,7 +8,7 @@ import { isString } from "../types/predicate";
 
 export const validateField = <T extends FieldValues, P extends FieldPath<T>>(
   value: FieldPathValue<T, P>,
-  rules: ValidationRule<T> | undefined
+  rules: ValidationRule<T, P> | undefined
 ) => {
   if (!rules) return "";
 
@@ -24,9 +24,7 @@ export const validateField = <T extends FieldValues, P extends FieldPath<T>>(
 
   // Check custom validation rule
   if (rules.validate) {
-    const validationResult = rules.validate(
-      value as FieldPathValue<T, FieldPath<T>>
-    );
+    const validationResult = rules.validate(value);
     if (isString(validationResult)) {
       return validationResult;
     } else if (!validationResult) {
