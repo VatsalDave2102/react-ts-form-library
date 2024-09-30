@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/VatsalDave2102/react-ts-form-library/compare/v1.2.1...v1.2.2) (2024-09-30)
+
+
+### Bug Fixes
+
+* type inference of value in register function ([7d2a691](https://github.com/VatsalDave2102/react-ts-form-library/commit/7d2a6919ec0c1e4a5be7161c2c5b4f57cb61daa0))
+
 ## [1.2.1](https://github.com/VatsalDave2102/react-ts-form-library/compare/v1.2.0...v1.2.1) (2024-09-27)
 
 
