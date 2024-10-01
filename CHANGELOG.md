@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/VatsalDave2102/react-ts-form-library/compare/v1.2.2...v1.3.0) (2024-10-01)
+
+
+### Features
+
+* add touched and dirty form states ([bb9d080](https://github.com/VatsalDave2102/react-ts-form-library/commit/bb9d0806117ff06c8609b7e835f645cac3455556))
+
 ## [1.2.2](https://github.com/VatsalDave2102/react-ts-form-library/compare/v1.2.1...v1.2.2) (2024-09-30)
 
 
