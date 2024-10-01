@@ -1,9 +1,11 @@
 import { useCallback, useRef, useState } from "react";
 
 import {
+  FieldDirty,
   FieldErrors,
   FieldPath,
   FieldPathValue,
+  FieldTouched,
   FieldValues,
   RegisterOptions,
   UseForm,
@@ -21,11 +23,14 @@ export function useForm<T extends FieldValues>(): UseForm<T> {
   // Initialize form values and errors state
   const [values, setValues] = useState<T>(Object.create(null));
   const [errors, setErrors] = useState<FieldErrors<T>>({});
+  const [touched, setTouched] = useState<FieldTouched<T>>({});
+  const [dirty, setDirty] = useState<FieldDirty<T>>({});
 
   // Store validation rules for each field
   const fieldsRef = useRef<{
     [K in FieldPath<T>]?: RegisterOptions<T, K>;
   }>({});
+
   /**
    * Registers a field with the form.
    * @param {keyof T} name - The name of the field to register.
@@ -41,14 +46,31 @@ export function useForm<T extends FieldValues>(): UseForm<T> {
         const value =
           e.target.type === "checkbox" ? e.target.checked : e.target.value;
         // Update form values
-        setValues((prev) =>
-          setNestedValue(prev, name, value as FieldPathValue<T, P>)
-        );
+        setValues((prev) => {
+          const newValues = setNestedValue(
+            prev,
+            name,
+            value as FieldPathValue<T, P>
+          );
+
+          // Mark field as dirty
+          setDirty((prevDirty) => ({
+            ...prevDirty,
+            [name]: true,
+          }));
+          return newValues;
+        });
       };
 
       const onBlur = () => {
-        const value = getNestedValue(values, name);
+        // Mark field as touched
+        setTouched((prevTouched) => ({
+          ...prevTouched,
+          [name]: true,
+        }));
+
         // Validate field on blur
+        const value = getNestedValue(values, name);
         const error = validateField(value, fieldsRef.current[name]);
 
         setErrors((prev) => ({
@@ -101,7 +123,15 @@ export function useForm<T extends FieldValues>(): UseForm<T> {
    */
   const setFieldValue = useCallback(
     <P extends FieldPath<T>>(name: P, value: FieldPathValue<T, P>) => {
-      setValues((prev) => setNestedValue(prev, name, value));
+      setValues((prev) => {
+        const newValues = setNestedValue(prev, name, value);
+        // Mark field as dirty
+        setDirty((prevDirty) => ({
+          ...prevDirty,
+          [name]: true,
+        }));
+        return newValues;
+      });
     },
     []
   );
@@ -143,6 +173,7 @@ export function useForm<T extends FieldValues>(): UseForm<T> {
 
       return newValues;
     });
+
     // Remove field errors
     setErrors((prev) => {
       const newErrors = { ...prev };
@@ -157,9 +188,33 @@ export function useForm<T extends FieldValues>(): UseForm<T> {
       delete current[lastKey];
       return newErrors;
     });
+
+    // Remore field touched state
+    setTouched((prevTouched) => {
+      const newTouched = { ...prevTouched };
+      delete newTouched[name];
+      return newTouched;
+    });
+
+    // Remove field dirty state
+    setDirty((prevDirty) => {
+      const newDirty = { ...prevDirty };
+      delete newDirty[name];
+      return newDirty;
+    });
+
     // Remove field validation rules
     delete fieldsRef.current[name];
   }, []);
 
-  return { register, handleSubmit, errors, values, setFieldValue, removeField };
+  return {
+    register,
+    handleSubmit,
+    errors,
+    values,
+    setFieldValue,
+    removeField,
+    touched,
+    dirty,
+  };
 }

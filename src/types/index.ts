@@ -42,6 +42,14 @@ export type FieldErrors<T extends FieldValues> = {
   [K in FieldPath<T>]?: string;
 };
 
+export type FieldTouched<T extends FieldValues> = {
+  [K in FieldPath<T>]?: boolean;
+};
+
+export type FieldDirty<T extends FieldValues> = {
+  [K in FieldPath<T>]?: boolean;
+};
+
 export type ValidationRule<T extends FieldValues, P extends FieldPath<T>> = {
   required?: boolean;
   pattern?: RegExp;
@@ -71,4 +79,6 @@ export interface UseForm<T extends FieldValues> {
     value: FieldPathValue<T, P>
   ) => void;
   removeField: <P extends FieldPath<T>>(name: P) => void;
+  touched: FieldTouched<T>;
+  dirty: FieldDirty<T>;
 }
