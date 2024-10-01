@@ -2,16 +2,18 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { useForm } from "../hooks/useForm";
 
 describe("useForm", () => {
-  it("should initialize with empty values and errors", () => {
+  it("should initialize with empty values and errors, touched, and dirty states", () => {
     const { result } = renderHook(() =>
       useForm<{ name: string; email: string }>()
     );
 
     expect(result.current.values).toEqual({});
     expect(result.current.errors).toEqual({});
+    expect(result.current.touched).toEqual({});
+    expect(result.current.dirty).toEqual({});
   });
 
-  it("should update values when input changes", () => {
+  it("should update values when input changes and mark field as dirty on change", () => {
     const { result } = renderHook(() => useForm<{ name: string }>());
 
     act(() => {
@@ -22,6 +24,7 @@ describe("useForm", () => {
     });
 
     expect(result.current.values).toEqual({ name: "John" });
+    expect(result.current.dirty.name).toBe(true);
   });
 
   it("should validate required fields", async () => {
@@ -69,6 +72,17 @@ describe("useForm", () => {
     await waitFor(() => {
       expect(result.current.errors).toEqual({ email: "Invalid format" });
     });
+  });
+
+  it("should mark field as touched on blur", () => {
+    const { result } = renderHook(() => useForm<{ name: string }>());
+
+    act(() => {
+      const { onBlur } = result.current.register("name");
+      onBlur();
+    });
+
+    expect(result.current.touched.name).toBe(true);
   });
 
   it("should handle form submission with valid data", () => {
