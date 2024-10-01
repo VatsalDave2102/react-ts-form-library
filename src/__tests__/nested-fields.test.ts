@@ -156,6 +156,7 @@ describe("nested-fields", () => {
       expect(result.current.values).toEqual({
         hobbies: ["Reading", "Cycling"],
       });
+      expect(result.current.dirty.hobbies).toBe(true);
     });
 
     act(() => {
@@ -208,6 +209,9 @@ describe("nested-fields", () => {
         },
         hobbies: ["Cycling"],
       });
+      expect(result.current.errors["address.city"]).toBeUndefined();
+      expect(result.current.dirty["address.city"]).toBeUndefined();
+      expect(result.current.touched["address.city"]).toBeUndefined();
     });
   });
 });
