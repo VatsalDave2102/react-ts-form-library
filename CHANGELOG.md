@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/VatsalDave2102/react-ts-form-library/compare/v1.3.0...v1.4.0) (2024-10-07)
+
+
+### Features
+
+* add custom error message option for each field ([c19b2bf](https://github.com/VatsalDave2102/react-ts-form-library/commit/c19b2bfb67f8f4c0b54e25ed31bf6e3aec0daf2c))
+
 # [1.3.0](https://github.com/VatsalDave2102/react-ts-form-library/compare/v1.2.2...v1.3.0) (2024-10-01)
 
 
