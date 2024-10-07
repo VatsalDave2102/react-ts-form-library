@@ -50,10 +50,26 @@ export type FieldDirty<T extends FieldValues> = {
   [K in FieldPath<T>]?: boolean;
 };
 
+export type ValidateFunction<T extends FieldValues, P extends FieldPath<T>> = (
+  value: FieldPathValue<T, P>
+) => boolean | string;
+
+export type ValidateCustomError<
+  T extends FieldValues,
+  P extends FieldPath<T>,
+> = {
+  validator: ValidateFunction<T, P>;
+  message: string;
+};
+
+export type Validate<T extends FieldValues, P extends FieldPath<T>> =
+  | ValidateFunction<T, P>
+  | ValidateCustomError<T, P>;
+
 export type ValidationRule<T extends FieldValues, P extends FieldPath<T>> = {
-  required?: boolean;
-  pattern?: RegExp;
-  validate?: (value: FieldPathValue<T, P>) => boolean | string;
+  required?: boolean | { value: boolean; message: string };
+  pattern?: RegExp | { value: RegExp; message: string };
+  validate?: Validate<T, P>;
 };
 
 export type RegisterOptions<
