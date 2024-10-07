@@ -46,6 +46,31 @@ describe("useForm", () => {
     });
   });
 
+  it("should show custom error message for required field", async () => {
+    const { result } = renderHook(() => useForm<{ name: string }>());
+
+    act(() => {
+      const register = result.current.register("name", {
+        required: { value: true, message: "Name is required!" },
+      });
+      register.onChange({
+        target: { value: "" },
+      } as React.ChangeEvent<HTMLInputElement>);
+    });
+
+    act(() => {
+      result.current
+        .register("name", {
+          required: { value: true, message: "Name is required!" },
+        })
+        .onBlur();
+    });
+
+    await waitFor(() => {
+      expect(result.current.errors.name).toBe("Name is required!");
+    });
+  });
+
   it("should validate pattern", async () => {
     const { result } = renderHook(() => useForm<{ email: string }>());
 
@@ -71,6 +96,33 @@ describe("useForm", () => {
 
     await waitFor(() => {
       expect(result.current.errors).toEqual({ email: "Invalid format" });
+    });
+  });
+
+  it("should show custom error message for pattern fields", async () => {
+    const { result } = renderHook(() => useForm<{ email: string }>());
+    const pattern = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+
+    act(() => {
+      const register = result.current.register("email", {
+        pattern: { value: pattern, message: "Email is invalid!" },
+      });
+
+      register.onChange({
+        target: { value: "invalidemail" },
+      } as React.ChangeEvent<HTMLInputElement>);
+    });
+
+    act(() => {
+      result.current
+        .register("email", {
+          pattern: { value: pattern, message: "Email is invalid!" },
+        })
+        .onBlur();
+    });
+
+    await waitFor(() => {
+      expect(result.current.errors).toEqual({ email: "Email is invalid!" });
     });
   });
 
