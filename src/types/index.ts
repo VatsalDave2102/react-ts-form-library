@@ -1,40 +1,33 @@
-export type FieldPath<T> =
-  T extends ReadonlyArray<unknown>
-    ? `${number}` | `${number}.${FieldPath<T[number]>}`
-    : T extends object
-      ? {
-          [K in keyof T]: K extends string
-            ? T[K] extends ReadonlyArray<unknown>
-              ? `${K}` | `${K}.${FieldPath<T[K]>}`
-              : T[K] extends object
-                ? `${K}` | `${K}.${FieldPath<T[K]>}`
-                : `${K}`
-            : never;
-        }[keyof T]
-      : never;
+// Get all possible paths
+export type FieldPath<T> = T extends object
+  ? {
+      [K in keyof T]: T[K] extends unknown[]
+        ? `${K & string}` | `${K & string}.${number}`
+        : T[K] extends object
+          ? `${K & string}` | `${K & string}.${FieldPath<T[K]>}`
+          : `${K & string}`;
+    }[keyof T]
+  : never;
 
+// Get value type at path
 export type FieldPathValue<
   T,
   P extends FieldPath<T>,
-> = P extends `${infer Key}.${infer Rest}`
-  ? Key extends keyof T
-    ? Rest extends FieldPath<T[Key]>
-      ? FieldPathValue<T[Key], Rest>
-      : never
-    : Key extends `${number}`
-      ? T extends ReadonlyArray<infer ArrayType>
-        ? Rest extends FieldPath<ArrayType>
-          ? FieldPathValue<ArrayType, Rest>
+> = P extends `${infer K}.${infer R}`
+  ? K extends keyof T
+    ? T[K] extends unknown[]
+      ? R extends `${number}`
+        ? T[K][number]
+        : never
+      : T[K] extends object
+        ? R extends FieldPath<T[K]>
+          ? FieldPathValue<T[K], R>
           : never
         : never
-      : never
+    : never
   : P extends keyof T
     ? T[P]
-    : P extends `${number}`
-      ? T extends ReadonlyArray<infer ArrayType>
-        ? ArrayType
-        : never
-      : never;
+    : never;
 
 export type FieldValues = Record<string, unknown>;
 
