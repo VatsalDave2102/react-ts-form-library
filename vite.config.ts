@@ -10,8 +10,11 @@ export default defineConfig({
     react(),
     dts({
       include: ["src"],
-      rollupTypes: true,
       outDir: "dist/types",
+      insertTypesEntry: true,
+      staticImport: true,
+      exclude: ["**/__tests__/**/*", "**/examples/**/*"],
+      tsconfigPath: "./tsconfig.app.json",
     }),
   ],
   build: {
