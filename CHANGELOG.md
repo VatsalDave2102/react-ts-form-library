@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/VatsalDave2102/react-ts-form-library/compare/v1.4.0...v1.4.1) (2024-10-08)
+
+
+### Bug Fixes
+
+* resolve declaration files generated using another command in build, only one is required now ([24b0553](https://github.com/VatsalDave2102/react-ts-form-library/commit/24b0553c97d87ea5ab2103688820a0f3428d5fb3))
+
 # [1.4.0](https://github.com/VatsalDave2102/react-ts-form-library/compare/v1.3.0...v1.4.0) (2024-10-07)
 
 
