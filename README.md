@@ -23,3 +23,4 @@ npm install @vatsal-dave/react-ts-form-library
 
 yarn add @vatsal-dave/react-ts-form-library
 ```
+NPM link: https://www.npmjs.com/package/@vatsal-dave/react-ts-form-library
